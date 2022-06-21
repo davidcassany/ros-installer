@@ -22,7 +22,7 @@ type RancherOS struct {
 
 type Install struct {
 	Automatic          bool   `json:"automatic,omitempty"`
-	ForceEFI           bool   `json:"forceEfi,omitempty"`
+	Firmware           string `json:"firmware,omitempty"`
 	Device             string `json:"device,omitempty"`
 	ConfigURL          string `json:"configUrl,omitempty"`
 	ISOURL             string `json:"isoUrl,omitempty"`

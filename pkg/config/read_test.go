@@ -190,14 +190,14 @@ rancheros:
 					Install: Install{
 						Device:          "foob",
 						ConfigURL:       "fooc",
-						ForceEFI:        true,
+						Firmware:        "efi",
 						RegistrationURL: "Foo",
 						ISOURL:          "http://foo.bar",
 						NoFormat:        true,
 						Debug:           true,
 						PowerOff:        true,
 						TTY:             "foo",
-						ContainerImage:  "container",
+						ContainerImage:  "docker:container",
 					},
 				},
 			}
@@ -207,16 +207,16 @@ rancheros:
 			Expect(e).To(
 				ContainElements(
 					"SSH_AUTHORIZED_KEYS=[github:mudler]",
-					"ELEMENTAL_TARGET=foob",
-					"ELEMENTAL_CLOUD_INIT=fooc",
-					"ELEMENTAL_FORCE_EFI=true",
+					"ELEMENTAL_INSTALL_TARGET=foob",
+					"ELEMENTAL_INSTALL_CLOUD_INIT=fooc",
+					"ELEMENTAL_INSTALL_FIRMWARE=efi",
 					"ELEMENTAL_REGISTRATION_URL=Foo",
-					"ELEMENTAL_ISO=http://foo.bar",
-					"ELEMENTAL_NO_FORMAT=true",
+					"ELEMENTAL_INSTALL_ISO=http://foo.bar",
+					"ELEMENTAL_INSTALL_NO_FORMAT=true",
 					"ELEMENTAL_DEBUG=true",
 					"ELEMENTAL_POWEROFF=true",
-					"ELEMENTAL_TTY=foo",
-					"ELEMENTAL_DOCKER_IMAGE=container",
+					"ELEMENTAL_INSTALL_TTY=foo",
+					"ELEMENTAL_INSTALL_SYSTEM=docker:container",
 				),
 			)
 		})
@@ -269,7 +269,7 @@ rancheros:
 			_ = ioutil.WriteFile(f.Name(), []byte(`
 rancheros:
   install:
-    containerImage: "docker/image:test"
+    containerImage: "docker:docker/image:test"
 `), os.ModePerm)
 
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
@@ -277,7 +277,7 @@ rancheros:
 			c, err := ReadConfig(ctx, f.Name(), false)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(c.RancherOS.Install.ISOURL).To(Equal(""))
-			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker/image:test"))
+			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker:docker/image:test"))
 		})
 		It("reads containerImage and registrationUrl", func() {
 
@@ -289,14 +289,14 @@ rancheros:
 rancheros:
   install:
     registrationUrl: "foobar"
-    containerImage: "docker/image:test"
+    containerImage: "docker:docker/image:test"
 `), os.ModePerm)
 
 			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 			defer cancel()
 			c, err := ReadConfig(ctx, f.Name(), false)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker/image:test"))
+			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker:docker/image:test"))
 		})
 
 		It("reads isoUrl instead of iso_url", func() {
@@ -348,7 +348,7 @@ ssh_authorized_keys:
 				RancherOS: RancherOS{
 					Install: Install{
 						Automatic:       true,
-						ForceEFI:        true,
+						Firmware:        "efi",
 						RegistrationURL: "Foo",
 						ISOURL:          "http://foo.bar",
 					},
@@ -372,7 +372,7 @@ ssh_authorized_keys:
 				RancherOS: RancherOS{
 					Install: Install{
 						Automatic:       true,
-						ForceEFI:        true,
+						Firmware:        "efi",
 						RegistrationURL: "Foo",
 						ISOURL:          "http://foo.bar",
 					},
@@ -433,7 +433,7 @@ rancheros:
 			defer cancel()
 
 			// Override the install value on the data
-			value := map[string]string{"containerImage": "test"}
+			value := map[string]string{"containerImage": "docker:test"}
 			values.PutValue(data, value, "rancheros", "install")
 
 			WSServer(ctx, data)
@@ -453,7 +453,7 @@ rancheros:
 
 			c, err := ReadConfig(ctx, f.Name(), false)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(c.RancherOS.Install.ContainerImage).To(Equal("test"))
+			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker:test"))
 
 			_ = ioutil.WriteFile(f.Name(), []byte(`
 rancheros:
@@ -466,7 +466,7 @@ rancheros:
 
 			c, err = ReadConfig(ctx, f.Name(), false)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(c.RancherOS.Install.ContainerImage).To(Equal("test"))
+			Expect(c.RancherOS.Install.ContainerImage).To(Equal("docker:test"))
 		})
 
 		It("doesn't error out if isoUrl or containerImage are not provided", func() {
